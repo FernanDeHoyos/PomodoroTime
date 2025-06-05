@@ -3,7 +3,9 @@ package com.fernan.pomodorotime.ui.habits
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AlarmOn
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,8 +18,10 @@ import com.fernan.pomodorotime.data.model.Habit
 fun HabitItem(
     habit: Habit,
     onToggle: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
+    val weekDays = listOf("L", "M", "X", "J", "V", "S", "D")
+
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -26,7 +30,6 @@ fun HabitItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onToggle() }
-            //.height(200.dp)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             IconButton(
@@ -50,24 +53,77 @@ fun HabitItem(
                     color = if (habit.isDone) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                     else MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(30.dp))
-                Text(
-                    text = habit.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+
+                if (habit.description.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = habit.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                if (!habit.reminderTime.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = "Hora de recordatorio",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = habit.reminderTime,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                if (habit.activeDays.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    val days = habit.activeDays.sorted().joinToString(" ") { weekDays[it % 7] }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AlarmOn,
+                            contentDescription = "Dias de repeticion",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text =  days,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 
+
 @Preview(showBackground = true)
 @Composable
 fun HabitItemPreview() {
     HabitItem(
-        habit = Habit(1, title = "Leer 10 páginas", description = "Leer antes de dormir para mejorar el hábito de lectura, Leer antes de dormir para mejorar el hábito de lectura", isDone = false),
+        habit = Habit(
+            id = 1,
+            title = "Leer 10 páginas",
+            description = "Leer antes de dormir para mejorar el hábito de lectura",
+            reminderTime = "21:00",
+            activeDays = listOf(0, 1, 2, 3, 4),
+            isDone = false
+        ),
         onToggle = {},
         onDelete = {}
     )
 }
+
