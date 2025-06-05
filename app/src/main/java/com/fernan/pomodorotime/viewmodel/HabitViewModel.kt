@@ -1,9 +1,7 @@
 package com.fernan.pomodorotime.viewmodel
 
 import android.app.Application
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernan.pomodorotime.data.model.Habit
 import kotlinx.coroutines.Dispatchers
