@@ -30,24 +30,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.fernan.pomodorotime.data.model.Habit
 
 @Composable
 fun AddHabitDialog(
+    habit: Habit? = null,
     onDismiss: () -> Unit,
     onAddHabit: (String, String, String?, List<Int>) -> Unit // now includes reminderTime
 ) {
 
-    var title by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+   // var title by remember { mutableStateOf("") }
+    //var description by remember { mutableStateOf("") }
 
     val weekDays = listOf("L", "M", "X", "J", "V", "S", "D") // 0 a 6
-    var selectedDays by remember { mutableStateOf(setOf<Int>()) }
+   // var selectedDays by remember { mutableStateOf(setOf<Int>()) }
     var showTimePicker by remember { mutableStateOf(false) }
-    var selectedHour by remember { mutableIntStateOf(12) }
-    var selectedMinute by remember { mutableIntStateOf(0) }
+    var selectedHour by remember { mutableStateOf(habit?.reminderTime?.substringBefore(":")?.toInt() ?: 8) }
+    var selectedMinute by remember { mutableStateOf(habit?.reminderTime?.substringAfter(":")?.toInt() ?: 0) }
 
-    val reminderTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+    var reminderTime by remember { mutableStateOf(habit?.reminderTime ?: "") }
 
+    var title by remember { mutableStateOf(habit?.title ?: "") }
+    var description by remember { mutableStateOf(habit?.description ?: "") }
+    //var reminderTime by remember { mutableStateOf(habit?.reminderTime ?: "") }
+    var selectedDays by remember { mutableStateOf(habit?.activeDays ?: emptyList()) }
+    LaunchedEffect(selectedHour, selectedMinute) {
+        reminderTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Nuevo hábito") },
@@ -61,7 +70,6 @@ fun AddHabitDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
-                        Color.Transparent,
                         focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                         unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                         disabledIndicatorColor = Color.Gray
@@ -100,7 +108,9 @@ fun AddHabitDialog(
                                 }
                             },
                             label = { Box(
-                                modifier = Modifier.fillMaxWidth().weight(5f),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(5f),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(

@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlarmOn
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
@@ -19,6 +20,8 @@ fun HabitItem(
     habit: Habit,
     onToggle: () -> Unit,
     onDelete: () -> Unit,
+    onClick: () -> Unit,
+    onViewHabit: () -> Unit,
 ) {
     val weekDays = listOf("L", "M", "X", "J", "V", "S", "D")
 
@@ -29,7 +32,7 @@ fun HabitItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
-            .clickable { onToggle() }
+            .clickable { onViewHabit() }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             IconButton(
@@ -39,6 +42,16 @@ fun HabitItem(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Eliminar"
+                )
+            }
+
+            IconButton(
+                onClick = onClick,
+                modifier = Modifier.align(Alignment.BottomEnd)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Create,
+                    contentDescription = "Editar"
                 )
             }
 
@@ -123,7 +136,9 @@ fun HabitItemPreview() {
             isDone = false
         ),
         onToggle = {},
-        onDelete = {}
+        onDelete = {},
+        onClick = {},
+        onViewHabit = {}
     )
 }
 

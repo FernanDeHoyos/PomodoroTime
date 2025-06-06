@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,13 +15,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.*
+import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.fernan.pomodorotime.ui.habits.HabitsScreen
 import com.fernan.pomodorotime.ui.theme.PomodoroTimeTheme
+import com.fernan.pomodorotime.ui.timer.TimerScreen
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Habits : Screen("habits", "Hábitos", Icons.Filled.FormatListNumbered )
-    object Timer : Screen("timer", "Temporizador", Icons.Filled.Timer)
+    object Timer : Screen("timer/{habitId}", "Temporizador", Icons.Filled.Timer) {
+        fun createRoute(habitId: Int): String = "timer/$habitId"
+    }
     object Stats : Screen("stats", "Estadísticas", Icons.Filled.BarChart)
 }
 class MainActivity : ComponentActivity() {
@@ -49,8 +56,17 @@ fun MainScreen() {
             startDestination = Screen.Habits.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Habits.route) { HabitsScreen() }
-            composable(Screen.Timer.route) { TimerScreen() }
+            composable(Screen.Habits.route) {
+                HabitsScreen(navController = navController)
+            }
+
+            composable(
+                route = "timer/{habitId}",
+                arguments = listOf(navArgument("habitId") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val habitId = backStackEntry.arguments?.getInt("habitId") ?: return@composable
+                TimerScreen(habitId = habitId)
+            }
             composable(Screen.Stats.route) { StatsScreen() }
         }
     }
@@ -90,10 +106,6 @@ fun BottomMenu(navController: NavHostController) {
 
 
 
-@Composable
-fun TimerScreen() {
-    Text(text = "Pantalla de Temporizador")
-}
 
 @Composable
 fun StatsScreen() {

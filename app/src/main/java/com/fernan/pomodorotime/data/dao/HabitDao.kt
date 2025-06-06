@@ -7,12 +7,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.fernan.pomodorotime.data.model.Habit
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HabitDao {
 
     @Query("SELECT * FROM habits")
-    suspend fun getAllHabits(): List<Habit>
+    fun getAllHabits(): Flow<List<Habit>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHabit(habit: Habit): Long
