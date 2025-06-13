@@ -16,4 +16,12 @@ interface PomodoroDao {
 
     @Query("SELECT * FROM pomodoro_sessions WHERE habitId = :habitId")
     suspend fun getSessionsByHabit(habitId: Int): List<PomodoroSession>
+
+    @Query("""
+    SELECT COUNT(*) FROM pomodoro_sessions 
+    WHERE habitId = :habitId 
+    AND date(timestamp / 1000, 'unixepoch') = date('now')
+""")
+    suspend fun getTodayPomodorosCount(habitId: Int): Int
+
 }

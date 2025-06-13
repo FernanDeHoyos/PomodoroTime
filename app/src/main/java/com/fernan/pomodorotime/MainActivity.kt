@@ -21,15 +21,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.fernan.pomodorotime.data.utils.RequestNotificationPermissionIfNeeded
 import com.fernan.pomodorotime.ui.habits.HabitsScreen
 import com.fernan.pomodorotime.ui.theme.PomodoroTimeTheme
 import com.fernan.pomodorotime.ui.timer.TimerScreen
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Habits : Screen("habits", "Hábitos", Icons.Filled.FormatListNumbered )
-    object Timer : Screen("timer/{habitId}", "Temporizador", Icons.Filled.Timer) {
-        fun createRoute(habitId: Int): String = "timer/$habitId"
-    }
+    object Timer : Screen("timer", "Temporizador", Icons.Filled.Timer )
     object Stats : Screen("stats", "Estadísticas", Icons.Filled.BarChart)
 }
 class MainActivity : ComponentActivity() {
@@ -46,6 +45,7 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun MainScreen() {
+    RequestNotificationPermissionIfNeeded()
     val navController = rememberNavController()
 
     Scaffold(
@@ -59,14 +59,7 @@ fun MainScreen() {
             composable(Screen.Habits.route) {
                 HabitsScreen(navController = navController)
             }
-
-            composable(
-                route = "timer/{habitId}",
-                arguments = listOf(navArgument("habitId") { type = NavType.IntType })
-            ) { backStackEntry ->
-                val habitId = backStackEntry.arguments?.getInt("habitId") ?: return@composable
-                TimerScreen(habitId = habitId)
-            }
+            composable(Screen.Timer.route) { TimerScreen() }
             composable(Screen.Stats.route) { StatsScreen() }
         }
     }
@@ -86,7 +79,10 @@ fun BottomMenu(navController: NavHostController) {
                     )
                 },
                 label = { Text(screen.title) },
-                selected = currentRoute == screen.route,
+                selected = when (screen) {
+                    is Screen.Timer -> currentRoute?.startsWith("timer/") == true
+                    else -> currentRoute == screen.route
+                },
                 onClick = {
                     if (currentRoute != screen.route) {
                         navController.navigate(screen.route) {

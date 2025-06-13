@@ -8,7 +8,6 @@ import com.fernan.pomodorotime.Screen
 import com.fernan.pomodorotime.ui.habits.componentes.HabitsScreenContent
 import com.fernan.pomodorotime.viewmodel.HabitViewModel
 
-@Preview
 @Composable
 fun HabitsScreen(
     navController: NavHostController, // 👈 nuevo parámetro
@@ -31,9 +30,7 @@ fun HabitsScreen(
         onEditHabit = { updatedHabit ->
             viewModel.updateHabit(updatedHabit)
         },
-        onViewHabit = { habit ->
-            navController.navigate(Screen.Timer.createRoute(habit.id))
-        }
+
     )
 }
 

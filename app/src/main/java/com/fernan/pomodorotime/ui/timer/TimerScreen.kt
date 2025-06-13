@@ -11,27 +11,25 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fernan.pomodorotime.ui.timer.component.NumberSelector
 import com.fernan.pomodorotime.viewmodel.TimerViewModel
-import com.fernan.pomodorotime.viewmodel.HabitViewModel
-import com.fernan.pomodorotime.data.model.Habit
 
-/**
- * Composable que representa la pantalla principal del temporizador Pomodoro.
- * Incluye visualización del tiempo, controles para iniciar/pausar/reiniciar,
- * y un DropdownMenu para seleccionar un hábito activo.
- */
 @Composable
-fun TimerScreen(habitId: Int, viewModel: TimerViewModel = viewModel()) {
-    LaunchedEffect(habitId) {
-        viewModel.setHabitId(habitId)
-    }
+fun TimerScreen(viewModel: TimerViewModel = viewModel()) {
+    var hours by remember { mutableStateOf(0) }
+    var minutes by remember { mutableStateOf(0) }
+    var seconds by remember { mutableStateOf(0) }
 
+    //val time by viewModel.time.collectAsState()
+    //val time by viewModel.remainingTime.collectAsState()
     val time by viewModel.time.collectAsState()
+
+
     val millis by viewModel.millis.collectAsState()
-    val totalTime by viewModel.totalSessionTime.collectAsState()
-    val maxTime = viewModel.sessionDuration
+    val maxTime by viewModel.sessionDuration.collectAsState()
+    val progress = if (maxTime > 0) time / maxTime.toFloat() else 0f
+
     val primaryColor = MaterialTheme.colorScheme.primary
-    val progress = (time + millis / 1000f) / maxTime.toFloat()
 
     Column(
         modifier = Modifier
@@ -40,6 +38,16 @@ fun TimerScreen(habitId: Int, viewModel: TimerViewModel = viewModel()) {
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            NumberSelector(range = 0..23, selected = hours, onSelectedChange = { hours = it }, label = "Horas")
+            NumberSelector(range = 0..59, selected = minutes, onSelectedChange = { minutes = it }, label = "Min")
+            NumberSelector(range = 0..59, selected = seconds, onSelectedChange = { seconds = it }, label = "Seg")
+        }
+
+
         Box(contentAlignment = Alignment.Center) {
             Canvas(modifier = Modifier.size(250.dp)) {
                 drawCircle(
@@ -62,21 +70,20 @@ fun TimerScreen(habitId: Int, viewModel: TimerViewModel = viewModel()) {
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(onClick = { viewModel.startTimer() }) { Text("Iniciar") }
+            Button(onClick = {
+                viewModel.setInitialTime(
+                    minutes = (hours * 60) + minutes,
+                    seconds = seconds
+                )
+                viewModel.startTimer()
+            }) { Text("Iniciar") }
+
             Button(onClick = { viewModel.stopTimer() }) { Text("Pausar") }
             Button(onClick = { viewModel.resetTimer() }) { Text("Reiniciar") }
         }
-
-        Button(onClick = { viewModel.saveSession() }) {
-            Text("Guardar sesión")
-        }
-
-        Text(
-            text = "Total acumulado: ${formatTime(totalTime)}",
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }
+
 
 /**
  * Formatea los valores de segundos y milisegundos en formato mm:ss:cc.

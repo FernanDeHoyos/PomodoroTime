@@ -12,11 +12,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.fernan.pomodorotime.Screen
 import com.fernan.pomodorotime.data.model.Habit
 import com.fernan.pomodorotime.ui.habits.HabitItem
+import com.fernan.pomodorotime.ui.timer.component.TimerScreenContent
+import com.fernan.pomodorotime.viewmodel.TimerViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitsScreenContent(
     navController: NavHostController,
@@ -25,10 +30,22 @@ fun HabitsScreenContent(
     onToggleHabit: (Habit) -> Unit,
     onDeleteHabit: (Habit) -> Unit,
     onEditHabit: (Habit) -> Unit,
-    onViewHabit: (Habit) -> Unit,
+    viewModel: TimerViewModel = viewModel()
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var habitToEdit by remember { mutableStateOf<Habit?>(null) }
+    var selectedHabitForTimer by remember { mutableStateOf<Habit?>(null) }
+
+    val pomodorosPorHabito by viewModel.pomodorosPorHabito.collectAsState()
+    val pomodorosToday = selectedHabitForTimer?.id?.let { pomodorosPorHabito[it] } ?: 0
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
+    val totalSessionTime by viewModel.totalSessionTime.collectAsState()
+    val elapsedSeconds by viewModel.time.collectAsState()
+
+
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -56,7 +73,10 @@ fun HabitsScreenContent(
                             showDialog = true
                         },
                         onViewHabit = {
-                            navController.navigate(Screen.Timer.createRoute(habit.id))
+                            selectedHabitForTimer = habit
+                            coroutineScope.launch {
+                                sheetState.show()
+                            }
                         }
                     )
                 }
@@ -77,13 +97,12 @@ fun HabitsScreenContent(
 
         if (showDialog) {
             AddHabitDialog(
-                habit = habitToEdit,  // pasamos el hábito a editar (puede ser null)
+                habit = habitToEdit,
                 onDismiss = { showDialog = false },
                 onAddHabit = { title, description, reminderTime, activeDays ->
                     if (habitToEdit == null) {
                         onAddHabit(title, description, reminderTime, activeDays)
                     } else {
-                        // Puedes crear una función onEditHabit que reciba el hábito actualizado
                         val updatedHabit = habitToEdit!!.copy(
                             title = title,
                             description = description,
@@ -96,8 +115,36 @@ fun HabitsScreenContent(
                 }
             )
         }
+
+        // Modal Bottom Sheet para el temporizador
+        if (selectedHabitForTimer != null) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    coroutineScope.launch { sheetState.hide() }
+                    selectedHabitForTimer = null
+                },
+                sheetState = sheetState
+            ) {
+                TimerScreenContent(
+                    habit = selectedHabitForTimer!!,
+                    initialTimeSeconds = 25,
+                    pomodorosToday = pomodorosToday, // Puedes calcular esto si tienes los datos
+                    timeTodaySeconds = totalSessionTime,
+                    onSaveSession = {  duration ->
+                        viewModel.saveSession(selectedHabitForTimer!!.id, duration) },
+                    onClose = {
+                        coroutineScope.launch { sheetState.hide() }
+                        selectedHabitForTimer = null
+                    }
+                )
+
+
+
+            }
+        }
     }
 }
+
 
 
 //@Preview(showBackground = true)
