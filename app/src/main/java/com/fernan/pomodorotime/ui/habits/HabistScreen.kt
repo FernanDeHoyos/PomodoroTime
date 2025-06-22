@@ -1,10 +1,8 @@
 package com.fernan.pomodorotime.ui.habits
 
 import androidx.compose.runtime.*
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.fernan.pomodorotime.Screen
 import com.fernan.pomodorotime.ui.habits.componentes.HabitsScreenContent
 import com.fernan.pomodorotime.viewmodel.HabitViewModel
 

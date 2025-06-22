@@ -43,7 +43,6 @@ fun HabitsScreenContent(
     // Estados
     val hours = getHoursRange()
     var showDialog by remember { mutableStateOf(false) }
-    var showConfirmDialog by remember { mutableStateOf(false) }
     var showEditConfirmDialog by remember { mutableStateOf(false) }
 
     var habitToEdit by remember { mutableStateOf<Habit?>(null) }

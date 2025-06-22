@@ -6,10 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.fernan.pomodorotime.data.dao.DayTotal
 import com.fernan.pomodorotime.data.dao.PomodoroDao
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 class StatsViewModel(application: Application) : AndroidViewModel(application) {
     //private val dao = DatabaseProvider.getDatabase(application).pomodoroDao()

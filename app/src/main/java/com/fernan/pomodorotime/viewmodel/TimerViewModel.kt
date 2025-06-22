@@ -4,9 +4,7 @@ package com.fernan.pomodorotime.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fernan.pomodorotime.data.dao.AppDatabase
 import com.fernan.pomodorotime.data.dao.PomodoroDao
 import com.fernan.pomodorotime.data.model.Habit
 import com.fernan.pomodorotime.data.model.PomodoroSession
@@ -22,23 +20,14 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val dao: PomodoroDao = DatabaseProvider.getDatabase(application).pomodoroDao()
     private val _remainingTime = MutableStateFlow(0)
-    val remainingTime = _remainingTime.asStateFlow()
 
     private val _pomodorosToday = MutableStateFlow(0)
-    val pomodorosToday = _pomodorosToday.asStateFlow()
-
-
     private var timerJob: Job? = null
-
     private val _time = MutableStateFlow(0)
     val time = _time.asStateFlow()
-
     private val _millis = MutableStateFlow(0)
     val millis = _millis.asStateFlow()
-
     private val _totalSessionTime = MutableStateFlow(0)
-    val totalSessionTime = _totalSessionTime.asStateFlow()
-
     private val _sessionDuration = MutableStateFlow(0)
     val sessionDuration = _sessionDuration.asStateFlow()
 
@@ -53,9 +42,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
     val tiempoPorHabito: StateFlow<Map<Int, Int>> = _tiempoPorHabito
 
 
-    fun getPomodorosForHabitToday(habitId: Int): Int {
-        return _pomodorosPorHabito.value[habitId] ?: 0
-    }
+
 
 
     fun setHabit(habitId: Int) {

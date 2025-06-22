@@ -58,11 +58,6 @@ fun TimerScreenContent(
     var millis by remember { mutableStateOf(0) }
     val POMODORO_MIN_DURATION = 25 * 60  // 1500 segundos
 
-    val completedHabitsToday by habitViewModel.completedHabitsToday.collectAsState()
-    val isDoneToday = completedHabitsToday.contains(habit.id)
-
-
-
 
     LaunchedEffect(isRunning) {
         if (isRunning) {

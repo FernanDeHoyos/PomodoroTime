@@ -1,13 +1,7 @@
 package com.fernan.pomodorotime.ui.habits.preview
 
-// Añade estas importaciones al principio del archivo
-import android.content.res.Configuration
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
+
 import com.fernan.pomodorotime.data.model.Habit
-import com.fernan.pomodorotime.ui.habits.componentes.HabitsScreenContent
 
 // Datos de prueba para los hábitos
 private val mockHabits = listOf(

@@ -20,7 +20,6 @@ import java.util.Date
 
 @Composable
 fun DaySelector(
-    selectedDate: Date = Date(),
     modifier: Modifier = Modifier,
     onDateSelected: (Date) -> Unit = {}
 ) {

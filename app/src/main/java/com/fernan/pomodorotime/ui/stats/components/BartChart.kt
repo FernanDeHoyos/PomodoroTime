@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import com.anychart.AnyChart
 import com.anychart.AnyChartView
 import com.anychart.chart.common.dataentry.ValueDataEntry
-import com.anychart.charts.Cartesian
 import com.fernan.pomodorotime.data.dao.DayTotal
 
 
