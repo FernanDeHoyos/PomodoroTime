@@ -17,7 +17,7 @@ import androidx.room.PrimaryKey
 )
 data class PomodoroSession(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val habitId: Long, // relación con el hábito
+    val habitId: Int, // relación con el hábito
     val totalTimeInSeconds: Int = 0,
     val timestamp: Long = System.currentTimeMillis() // ⬅️ AÑADIR ESTO
 )

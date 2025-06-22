@@ -11,7 +11,8 @@ import com.fernan.pomodorotime.viewmodel.HabitViewModel
 @Composable
 fun HabitsScreen(
     navController: NavHostController, // 👈 nuevo parámetro
-    viewModel: HabitViewModel = viewModel()
+    viewModel: HabitViewModel = viewModel(),
+    openTimer: Boolean, habitId: Long
 ) {
     val habits by viewModel.habits.collectAsState()
 
@@ -30,6 +31,8 @@ fun HabitsScreen(
         onEditHabit = { updatedHabit ->
             viewModel.updateHabit(updatedHabit)
         },
+        openTimer = openTimer,
+        habitIdToOpen = habitId
 
     )
 }

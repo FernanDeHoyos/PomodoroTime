@@ -2,11 +2,13 @@ package com.fernan.pomodorotime.viewmodel
 
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fernan.pomodorotime.data.dao.AppDatabase
 import com.fernan.pomodorotime.data.dao.PomodoroDao
+import com.fernan.pomodorotime.data.model.Habit
 import com.fernan.pomodorotime.data.model.PomodoroSession
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -47,34 +49,53 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
     private val _pomodorosPorHabito = MutableStateFlow<Map<Int, Int>>(emptyMap())
     val pomodorosPorHabito: StateFlow<Map<Int, Int>> = _pomodorosPorHabito
 
+    private val _tiempoPorHabito = MutableStateFlow<Map<Int, Int>>(emptyMap())
+    val tiempoPorHabito: StateFlow<Map<Int, Int>> = _tiempoPorHabito
+
 
     fun getPomodorosForHabitToday(habitId: Int): Int {
         return _pomodorosPorHabito.value[habitId] ?: 0
     }
 
-    private fun loadPomodorosToday() {
-        viewModelScope.launch {
-            currentHabitId?.let { id ->
-                val count = dao.getTodayPomodorosCount(id)
-                _pomodorosToday.value = count
-            }
-        }
-    }
 
     fun setHabit(habitId: Int) {
         currentHabitId = habitId
-        loadAccumulatedTime()
-        loadPomodorosToday()
-    }
-
-    private fun loadAccumulatedTime() {
         viewModelScope.launch {
-            currentHabitId?.let { id ->
-                val total = dao.getTotalAccumulatedTime(id) ?: 0
-                _totalSessionTime.value = total
-            }
+            val count = dao.getTodayPomodorosCount(habitId)
+            val totalTime = dao.getTotalAccumulatedTime(habitId) ?: 0
+            _pomodorosPorHabito.value = mapOf(habitId to count)
+            _totalSessionTime.value = totalTime
         }
     }
+
+    private fun loadPomodorosToday(habitId: Int) {
+        viewModelScope.launch {
+            val count = dao.getTodayPomodorosCount(habitId)
+            _pomodorosToday.value = count
+            Log.d("TimerViewModel", "Pomodoros hoy desde DB: $count")
+        }
+    }
+
+    private fun loadAccumulatedTime(habitId: Int) {
+        viewModelScope.launch {
+            val total = dao.getTotalAccumulatedTime(habitId) ?: 0
+            _totalSessionTime.value = total
+            Log.d("TimerViewModel", "Tiempo total desde DB: $total segundos")
+        }
+    }
+
+    fun refreshHabitData(habitId: Int) {
+        viewModelScope.launch {
+            val pomodoros = dao.getTodayPomodorosCount(habitId)
+            val tiempo = dao.getTotalAccumulatedTime(habitId) ?: 0
+
+            _pomodorosPorHabito.update { it + (habitId to pomodoros) }
+            _tiempoPorHabito.update { it + (habitId to tiempo) }
+        }
+    }
+
+
+
 
     fun startTimer() {
         if (timerJob?.isActive == true) return
@@ -106,12 +127,45 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
 
 
     fun saveSession(habitId: Int, duration: Int) {
-        _totalSessionTime.value += duration
-        _pomodorosPorHabito.update { current ->
-            val currentCount = current[habitId] ?: 0
-            current.toMutableMap().apply {
-                this[habitId] = currentCount + 1
+        viewModelScope.launch {
+            // Guarda en base de datos
+            dao.insertSession(
+                PomodoroSession(
+                    habitId = habitId,
+                    totalTimeInSeconds = duration,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+            loadAccumulatedTime(habitId)
+            loadPomodorosToday(habitId)
+            // Actualiza los contadores locales (opcionalmente podrías recargar desde la BD)
+            _totalSessionTime.value += duration
+            _pomodorosPorHabito.update { current ->
+                val currentCount = current[habitId] ?: 0
+                current.toMutableMap().apply {
+                    this[habitId] = currentCount + 1
+                }
             }
+        }
+    }
+
+
+
+    fun loadAll(habits: List<Habit>) {
+        viewModelScope.launch {
+            val tiempoMap = mutableMapOf<Int, Int>()
+            val pomodorosMap = mutableMapOf<Int, Int>()
+
+            habits.forEach { habit ->
+                val count = dao.getTodayPomodorosCount(habit.id)
+                val total = dao.getTotalAccumulatedTime(habit.id) ?: 0
+
+                pomodorosMap[habit.id] = count
+                tiempoMap[habit.id] = total
+            }
+
+            _pomodorosPorHabito.value = pomodorosMap
+            _tiempoPorHabito.value = tiempoMap
         }
     }
 

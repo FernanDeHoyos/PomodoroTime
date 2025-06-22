@@ -1,4 +1,4 @@
-package com.fernan.pomodorotime.data.utils
+package com.fernan.pomodorotime.utils
 
 
 import androidx.room.TypeConverter

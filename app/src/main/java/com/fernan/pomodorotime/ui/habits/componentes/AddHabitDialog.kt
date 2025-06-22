@@ -1,5 +1,6 @@
 package com.fernan.pomodorotime.ui.habits.componentes
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,20 +61,18 @@ fun AddHabitDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Nuevo hábito") },
+        modifier = Modifier.background(Color.Transparent),
+        containerColor = MaterialTheme.colorScheme.surface,
         text = {
-            Column {
+            Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
+
                 // Campo Título: solo una línea con línea inferior (estilo 'underline')
                 TextField(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("Título") },
-                    singleLine = true,
+                    singleLine = false,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        disabledIndicatorColor = Color.Gray
-                    )
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
